@@ -249,23 +249,21 @@ Item {
 
   Process {
     id: floatQuery
-    command: ["hyprctl", "-j", "clients"]
+    // The plugin window is active immediately after it is summoned. Query
+    // only that window instead of materializing every client in Quickshell.
+    command: ["hyprctl", "-j", "activewindow"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
         try {
-          var clients = JSON.parse(String(text || ""))
-          for (var i = 0; i < clients.length; i++) {
-            var client = clients[i]
-            if (client.class === "org.quickshell" && client.title === window.title && client.address) {
-              var target = 'address:' + client.address
-              floatSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.float({ window = "' + target + '", action = "on" })']
-              floatTimer.stop()
-              initialResize.command = ["hyprctl", "dispatch", 'hl.dsp.window.resize({ window = "' + target + '", x = 800, y = 450 })']
-              centerSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.center({ window = "' + target + '" })']
-              floatSetter.running = true
-              break
-            }
+          var client = JSON.parse(String(text || "{}"))
+          if (client.class === "org.quickshell" && client.title === window.title && client.address) {
+            var target = 'address:' + client.address
+            floatSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.float({ window = "' + target + '", action = "on" })']
+            floatTimer.stop()
+            initialResize.command = ["hyprctl", "dispatch", 'hl.dsp.window.resize({ window = "' + target + '", x = 800, y = 450 })']
+            centerSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.center({ window = "' + target + '" })']
+            floatSetter.running = true
           }
         } catch (e) { /* Hyprland may be unavailable during shell startup. */ }
       }
@@ -316,7 +314,9 @@ Item {
 
   Process {
     id: exportProc
-    stderr: StdioCollector { waitForEnd: true }
+    // ffmpeg progress and diagnostics are intentionally discarded. Keeping
+    // an unconsumed collector here would retain the complete stderr output
+    // for every export in the long-lived Quickshell process.
     onExited: function(exitCode) {
       root.exporting = false
       if (exitCode === 0) {
