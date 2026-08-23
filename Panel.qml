@@ -123,11 +123,27 @@ Item {
 
   function cropFilter() {
     if (!root.hasSelection || root.sourceWidth <= 0 || root.sourceHeight <= 0) return ""
-    var x = Math.max(0, Math.floor(cropRect.x / videoSurface.width * root.sourceWidth))
-    var y = Math.max(0, Math.floor(cropRect.y / videoSurface.height * root.sourceHeight))
-    var w = Math.max(2, Math.floor(cropRect.width / videoSurface.width * root.sourceWidth))
-    var h = Math.max(2, Math.floor(cropRect.height / videoSurface.height * root.sourceHeight))
+    // PreserveAspectFit can leave letterbox margins inside videoSurface. Map
+    // only the intersection with VideoOutput.contentRect, never the black
+    // margins, and clamp the result to the real source dimensions.
+    var content = videoOutput.contentRect
+    if (content.width <= 0 || content.height <= 0) return ""
+    var left = Math.max(cropRect.x, content.x)
+    var top = Math.max(cropRect.y, content.y)
+    var right = Math.min(cropRect.x + cropRect.width, content.x + content.width)
+    var bottom = Math.min(cropRect.y + cropRect.height, content.y + content.height)
+    if (right - left < 2 || bottom - top < 2) return ""
+
+    var x = Math.floor((left - content.x) / content.width * root.sourceWidth)
+    var y = Math.floor((top - content.y) / content.height * root.sourceHeight)
+    var w = Math.floor((right - left) / content.width * root.sourceWidth)
+    var h = Math.floor((bottom - top) / content.height * root.sourceHeight)
+    x = Math.max(0, Math.min(root.sourceWidth - 2, x))
+    y = Math.max(0, Math.min(root.sourceHeight - 2, y))
+    w = Math.max(2, Math.min(root.sourceWidth - x, w))
+    h = Math.max(2, Math.min(root.sourceHeight - y, h))
     x = x - (x % 2); y = y - (y % 2); w = w - (w % 2); h = h - (h % 2)
+    if (w < 2 || h < 2) return ""
     return "crop=" + w + ":" + h + ":" + x + ":" + y
   }
 
