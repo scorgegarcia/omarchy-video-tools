@@ -200,7 +200,10 @@ Item {
     Rectangle {
       anchors.fill: parent
       color: Qt.rgba(0, 0, 0, 0.08)
-      MouseArea { anchors.fill: parent; onClicked: root.dismiss() }
+      // Do not dismiss on outside clicks. Native file dialogs temporarily
+      // move focus outside this layer-surface; closing here would destroy the
+      // editor while the user is choosing a file. ESC remains the close action.
+      MouseArea { anchors.fill: parent; onClicked: {} }
     }
 
     Item {
