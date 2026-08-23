@@ -269,6 +269,7 @@ Item {
               var target = 'address:' + client.address
               floatSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.float({ window = "' + target + '", action = "on" })']
               floatTimer.stop()
+              initialResize.command = ["hyprctl", "dispatch", 'hl.dsp.window.resize({ window = "' + target + '", x = 800, y = 450 })']
               centerSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.center({ window = "' + target + '" })']
               floatSetter.running = true
               break
@@ -281,6 +282,11 @@ Item {
 
   Process {
     id: floatSetter
+    onExited: initialResize.running = true
+  }
+
+  Process {
+    id: initialResize
     onExited: centerSetter.running = true
   }
 
@@ -365,8 +371,8 @@ Item {
     color: root.surface
     implicitWidth: 800
     implicitHeight: 450
-    minimumSize: Qt.size(800, 450)
-    maximumSize: Qt.size(800, 450)
+    minimumSize: Qt.size(640, 360)
+    maximumSize: Qt.size(1600, 900)
 
     // Closing the normal window with its title-bar button must update the
     // shell's open-panel state just like Escape does.
