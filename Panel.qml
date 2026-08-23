@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import QtMultimedia
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
 import qs.Commons
 import "I18n.js" as I18n
 
@@ -17,6 +16,7 @@ Item {
   property var shell: null
   property var manifest: null
   property bool opened: false
+  property bool closingFromHost: false
   property string videoPath: ""
   property string outputPath: ""
   readonly property string systemLanguageCode: root.systemLanguage()
@@ -108,6 +108,7 @@ Item {
   }
 
   function open(payloadJson) {
+    root.closingFromHost = false
     root.opened = true
     root.status = ""
     Qt.callLater(function() { dropFocus.forceActiveFocus() })
@@ -115,6 +116,7 @@ Item {
 
   function close() {
     if (root.exporting) return
+    root.closingFromHost = true
     player.stop()
     root.opened = false
     root.videoPath = ""
@@ -124,6 +126,7 @@ Item {
     root.trimStart = 0
     root.trimEnd = 0
     root.status = ""
+    root.closingFromHost = false
   }
 
   function dismiss() {
@@ -204,6 +207,50 @@ Item {
     videoDialog.open()
   }
 
+  function requestFloatingWindow() {
+    if (window.visible && !floatQuery.running) floatQuery.running = true
+  }
+
+  Process {
+    id: floatQuery
+    command: ["hyprctl", "-j", "clients"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        try {
+          var clients = JSON.parse(String(text || ""))
+          for (var i = 0; i < clients.length; i++) {
+            var client = clients[i]
+            if (client.class === "org.quickshell" && client.title === window.title && client.address) {
+              var target = 'address:' + client.address
+              floatSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.float({ window = "' + target + '", action = "on" })']
+              floatTimer.stop()
+              floatSetter.running = true
+              break
+            }
+          }
+        } catch (e) { /* Hyprland may be unavailable during shell startup. */ }
+      }
+    }
+  }
+
+  Process { id: floatSetter }
+
+  Timer {
+    id: floatTimer
+    interval: 120
+    repeat: true
+    property int attempts: 0
+    onTriggered: {
+      if (!window.visible || attempts >= 10) {
+        stop()
+        return
+      }
+      attempts++
+      root.requestFloatingWindow()
+    }
+  }
+
   Process {
     id: probe
     stdout: StdioCollector {
@@ -261,33 +308,28 @@ Item {
     onDurationChanged: if (root.trimEnd === 0) root.trimEnd = duration
   }
 
-  PanelWindow {
+  FloatingWindow {
+    id: window
     visible: root.opened
-    anchors { top: true; bottom: true; left: true; right: true }
-    color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.namespace: "jvi-video-tools"
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
-    // Keep only the editor card interactive. When the native file dialog is
-    // open, remove the region entirely so the dialog can receive clicks even
-    // though this panel remains on the overlay layer.
-    mask: Region { item: root.fileDialogOpen ? null : dropFocus }
+    title: root.t("title")
+    color: root.surface
+    implicitWidth: Style.space(720)
+    implicitHeight: Style.space(560)
+    minimumSize: Qt.size(Style.space(520), Style.space(420))
 
-    Rectangle {
-      anchors.fill: parent
-      color: Qt.rgba(0, 0, 0, 0.08)
-      // Do not dismiss on outside clicks. Native file dialogs temporarily
-      // move focus outside this layer-surface; closing here would destroy the
-      // editor while the user is choosing a file. ESC remains the close action.
-      MouseArea { anchors.fill: parent; onClicked: {} }
+    // Closing the normal window with its title-bar button must update the
+    // shell's open-panel state just like Escape does.
+    onVisibleChanged: {
+      if (visible) {
+        floatTimer.attempts = 0
+        floatTimer.restart()
+      }
+      else if (root.opened && !root.closingFromHost) root.dismiss()
     }
 
     Item {
       id: dropFocus
-      anchors.centerIn: parent
-      width: Math.min(Style.space(720), parent.width - Style.space(36))
-      height: Math.min(Style.space(560), parent.height - Style.space(36))
+      anchors.fill: parent
       focus: true
       Keys.onEscapePressed: root.dismiss()
 
