@@ -167,13 +167,13 @@ Item {
         }
       }
     }
-    onExited: if (exitCode === 0) root.status = root.t("ready")
+    onExited: function(exitCode) { if (exitCode === 0) root.status = root.t("ready") }
   }
 
   Process {
     id: exportProc
     stderr: StdioCollector { waitForEnd: true }
-    onExited: {
+    onExited: function(exitCode) {
       root.exporting = false
       if (exitCode === 0) {
         root.status = root.t("saved") + root.fileName(root.outputPath)
