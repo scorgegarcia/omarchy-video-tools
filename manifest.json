@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "jvi.video-tools",
+  "name": "Video tools",
+  "version": "0.1.0",
+  "author": "Javier Ivan",
+  "description": "A themed Omarchy panel for previewing, trimming, and cropping videos",
+  "kinds": ["panel"],
+  "entryPoints": {
+    "panel": "Panel.qml"
+  }
+}
