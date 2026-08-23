@@ -28,7 +28,7 @@ Item {
   property bool hasSelection: cropRect.width > 8 && cropRect.height > 8
   property bool exporting: false
   property bool fileDialogOpen: false
-  property string status: I18n.text(language, "drop")
+  property string status: ""
   property color surface: Color.popups.background
   property color foreground: Color.popups.text
   property color border: Color.popups.border
@@ -109,7 +109,7 @@ Item {
 
   function open(payloadJson) {
     root.opened = true
-    root.status = root.t("drop")
+    root.status = ""
     Qt.callLater(function() { dropFocus.forceActiveFocus() })
   }
 
@@ -123,7 +123,7 @@ Item {
     root.sourceHeight = 0
     root.trimStart = 0
     root.trimEnd = 0
-    root.status = root.t("drop")
+    root.status = ""
   }
 
   function dismiss() {
