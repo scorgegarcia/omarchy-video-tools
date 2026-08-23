@@ -43,9 +43,6 @@ omarchy shell shell summon jvi.video-tools '{}'
 omarchy plugin remove jvi.video-tools --yes
 ```
 
-The plugin does not modify the bar. If you added the optional keyboard binding,
-remove the `Video tools` line from `~/.config/hypr/bindings.conf`.
-
 ## License
 
 MIT. See [LICENSE](LICENSE).
