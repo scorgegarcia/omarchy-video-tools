@@ -458,7 +458,6 @@ Item {
           Layout.fillWidth: true
           Text { text: root.formatTime(player.position) + " / " + root.formatTime(player.duration); color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.caption }
           Item { Layout.fillWidth: true }
-          Text { text: root.status; color: Qt.alpha(root.foreground, 0.7); elide: Text.ElideMiddle; Layout.maximumWidth: Style.space(380); font.family: root.fontFamily; font.pixelSize: Style.font.caption }
         }
 
         RowLayout {
