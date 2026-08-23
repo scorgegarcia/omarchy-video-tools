@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import QtMultimedia
 import Quickshell
@@ -26,13 +25,11 @@ Item {
   property int trimEnd: 0
   property bool hasSelection: cropRect.width > 8 && cropRect.height > 8
   property bool exporting: false
-  property bool fileDialogOpen: false
   property string status: ""
   property color surface: Color.popups.background
   property color foreground: Color.popups.text
   property color border: Color.popups.border
   property color accent: Color.accent
-  property color selected: Color.menu.selectedBackground
   property string fontFamily: Style.font.family
 
   PersistentProperties {
@@ -246,11 +243,6 @@ Item {
     cropRect.width = 0; cropRect.height = 0
   }
 
-  function openVideoDialog() {
-    root.fileDialogOpen = true
-    videoDialog.open()
-  }
-
   function requestFloatingWindow() {
     if (window.visible && !floatQuery.running) floatQuery.running = true
   }
@@ -338,27 +330,6 @@ Item {
   }
 
   Process { id: notify }
-
-  FileDialog {
-    id: videoDialog
-    title: root.t("chooseVideo")
-    fileMode: FileDialog.OpenFile
-    // Avoid the native GTK/GVFS dialog. Its first-use initialization can
-    // abort the Quickshell process before the video is selected.
-    options: FileDialog.DontUseNativeDialog
-    nameFilters: [
-      root.t("videoFiles") + " (*.mp4 *.mkv *.mov *.webm *.avi *.m4v *.wmv *.flv)",
-      root.t("allFiles") + " (*)"
-    ]
-    onAccepted: {
-      root.fileDialogOpen = false
-      var chosen = selectedFile
-      if ((!chosen || chosen.toString() === "") && selectedFiles.length > 0) chosen = selectedFiles[0]
-      root.loadVideo(root.localPath(chosen))
-    }
-    onRejected: root.fileDialogOpen = false
-    onVisibleChanged: if (!visible) root.fileDialogOpen = false
-  }
 
   MediaPlayer {
     id: player
@@ -459,7 +430,6 @@ Item {
               border.width: 1
               border.color: root.accent
               Text { anchors.centerIn: parent; text: root.t("dropHint"); color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body }
-              TapHandler { onTapped: root.openVideoDialog() }
             }
           }
 
