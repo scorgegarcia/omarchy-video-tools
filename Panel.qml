@@ -225,6 +225,7 @@ Item {
               var target = 'address:' + client.address
               floatSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.float({ window = "' + target + '", action = "on" })']
               floatTimer.stop()
+              centerSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.center({ window = "' + target + '" })']
               floatSetter.running = true
               break
             }
@@ -234,7 +235,12 @@ Item {
     }
   }
 
-  Process { id: floatSetter }
+  Process {
+    id: floatSetter
+    onExited: centerSetter.running = true
+  }
+
+  Process { id: centerSetter }
 
   Timer {
     id: floatTimer
@@ -313,14 +319,18 @@ Item {
     visible: root.opened
     title: root.t("title")
     color: root.surface
-    implicitWidth: Style.space(720)
-    implicitHeight: Style.space(560)
-    minimumSize: Qt.size(Style.space(520), Style.space(420))
+    width: 800
+    height: 450
+    minimumSize: Qt.size(800, 450)
+    maximumSize: Qt.size(800, 450)
 
     // Closing the normal window with its title-bar button must update the
     // shell's open-panel state just like Escape does.
     onVisibleChanged: {
       if (visible) {
+        width = 800
+        height = 450
+        minimumSize = Qt.size(800, 450)
         floatTimer.attempts = 0
         floatTimer.restart()
       }
@@ -344,8 +354,8 @@ Item {
 
       ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.space(18)
-        spacing: Style.space(12)
+        anchors.margins: Style.space(12)
+        spacing: Style.space(8)
 
         RowLayout {
           Layout.fillWidth: true
@@ -392,7 +402,7 @@ Item {
             Rectangle {
               anchors.centerIn: parent
               width: Math.min(parent.width - 40, 330)
-              height: 78
+              height: 64
               visible: !root.videoPath
               color: Qt.alpha(root.surface, 0.92)
               radius: Style.cornerRadius
