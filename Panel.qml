@@ -322,6 +322,74 @@ Item {
           enabled: !!root.videoPath && !root.exporting
         }
 
+        // Visual trim range. The normal playback slider above stays free for
+        // scrubbing; this second track makes the punch-in/punch-out points
+        // persistent and easy to verify before exporting.
+        Item {
+          Layout.fillWidth: true
+          height: Style.space(34)
+          visible: root.videoPath !== "" && player.duration > 0
+
+          Rectangle {
+            id: trimTrack
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            height: Style.space(5)
+            radius: height / 2
+            color: Qt.alpha(root.foreground, 0.22)
+          }
+
+          Rectangle {
+            anchors.verticalCenter: trimTrack.verticalCenter
+            x: trimTrack.width * root.trimStart / Math.max(1, player.duration)
+            width: Math.max(0, trimTrack.width * (Math.max(root.trimStart, root.trimEnd) - root.trimStart) / Math.max(1, player.duration))
+            height: trimTrack.height
+            radius: height / 2
+            color: Qt.alpha(root.accent, 0.52)
+          }
+
+          Rectangle {
+            id: inMarker
+            x: Math.max(0, Math.min(trimTrack.width - width, trimTrack.width * root.trimStart / Math.max(1, player.duration) - width / 2))
+            anchors.verticalCenter: trimTrack.verticalCenter
+            width: Style.space(3)
+            height: Style.space(24)
+            radius: width / 2
+            color: root.accent
+          }
+
+          Rectangle {
+            id: outMarker
+            x: Math.max(0, Math.min(trimTrack.width - width, trimTrack.width * (root.trimEnd > 0 ? root.trimEnd : player.duration) / Math.max(1, player.duration) - width / 2))
+            anchors.verticalCenter: trimTrack.verticalCenter
+            width: Style.space(3)
+            height: Style.space(24)
+            radius: width / 2
+            color: root.accent
+          }
+
+          Text {
+            anchors.bottom: trimTrack.top
+            anchors.left: inMarker.right
+            anchors.leftMargin: Style.space(4)
+            text: "IN " + root.formatTime(root.trimStart)
+            color: root.accent
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+          }
+
+          Text {
+            anchors.bottom: trimTrack.top
+            anchors.right: outMarker.left
+            anchors.rightMargin: Style.space(4)
+            text: "OUT " + root.formatTime(root.trimEnd > 0 ? root.trimEnd : player.duration)
+            color: root.accent
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+          }
+        }
+
         RowLayout {
           Layout.fillWidth: true
           Text { text: root.formatTime(player.position) + " / " + root.formatTime(player.duration); color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.caption }
