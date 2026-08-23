@@ -343,6 +343,9 @@ Item {
     id: videoDialog
     title: root.t("chooseVideo")
     fileMode: FileDialog.OpenFile
+    // Avoid the native GTK/GVFS dialog. Its first-use initialization can
+    // abort the Quickshell process before the video is selected.
+    options: FileDialog.DontUseNativeDialog
     nameFilters: [
       root.t("videoFiles") + " (*.mp4 *.mkv *.mov *.webm *.avi *.m4v *.wmv *.flv)",
       root.t("allFiles") + " (*)"
