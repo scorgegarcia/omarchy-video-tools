@@ -19,7 +19,8 @@ Item {
   property bool opened: false
   property string videoPath: ""
   property string outputPath: ""
-  readonly property string language: root.systemLanguage()
+  readonly property string systemLanguageCode: root.systemLanguage()
+  readonly property string language: persisted.languageOverride !== "" ? persisted.languageOverride : root.systemLanguageCode
   property int sourceWidth: 0
   property int sourceHeight: 0
   property int trimStart: 0
@@ -35,7 +36,39 @@ Item {
   property color selected: Color.menu.selectedBackground
   property string fontFamily: Style.font.family
 
+  PersistentProperties {
+    id: persisted
+    reloadableId: "jvi-video-tools"
+    property string languageOverride: ""
+  }
+
   function t(key) { return I18n.text(root.language, key) }
+
+  readonly property var languageOptions: [
+    { label: root.t("system"), value: "" },
+    { label: "English", value: "en" },
+    { label: "Español", value: "es" },
+    { label: "Português", value: "pt" },
+    { label: "Français", value: "fr" },
+    { label: "Deutsch", value: "de" },
+    { label: "Italiano", value: "it" },
+    { label: "日本語", value: "ja" },
+    { label: "한국어", value: "ko" },
+    { label: "中文", value: "zh" },
+    { label: "Русский", value: "ru" }
+  ]
+
+  function languageIndex() {
+    var selected = persisted.languageOverride
+    if (selected === "") return 0
+    for (var i = 0; i < root.languageOptions.length; i++)
+      if (root.languageOptions[i].value === selected) return i
+    return 0
+  }
+
+  function setLanguage(value) {
+    persisted.languageOverride = String(value || "")
+  }
 
   function systemLanguage() {
     var candidates = [Quickshell.env("LANGUAGE"), Quickshell.env("LANG"), Quickshell.env("LC_MESSAGES"), Qt.locale().name]
@@ -276,6 +309,21 @@ Item {
           Layout.fillWidth: true
           Text { text: root.t("title"); color: root.foreground; font.family: root.fontFamily; font.bold: true; font.letterSpacing: 2; font.pixelSize: Style.font.title }
           Item { Layout.fillWidth: true }
+          ComboBox {
+            id: languageBox
+            model: root.languageOptions
+            textRole: "label"
+            currentIndex: root.languageIndex()
+            implicitWidth: Style.space(112)
+            implicitHeight: Style.space(28)
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            onActivated: function(index) { root.setLanguage(root.languageOptions[index].value) }
+            Connections {
+              target: root
+              function onLanguageChanged() { languageBox.currentIndex = root.languageIndex() }
+            }
+          }
           Text { text: root.t("close"); color: Qt.alpha(root.foreground, 0.55); font.family: root.fontFamily; font.pixelSize: Style.font.caption }
         }
 
