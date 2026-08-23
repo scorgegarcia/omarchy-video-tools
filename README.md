@@ -29,7 +29,9 @@ bar.
 omarchy plugin add https://github.com/scorgegarcia/omarchy-video-tools --enable
 ```
 
-Open it with `Super + Shift + V`, or run:
+Open it with `Super + Shift + V`, or move the mouse over the clock and click
+the small video icon that appears beside the inactive indicators. You can also
+run:
 
 ```bash
 omarchy shell shell summon jvi.video-tools '{}'

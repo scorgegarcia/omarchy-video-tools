@@ -5,8 +5,15 @@
   "version": "0.1.0",
   "author": "Javier Ivan",
   "description": "A themed Omarchy panel for previewing, trimming, and cropping videos",
-  "kinds": ["panel"],
+  "kinds": ["panel", "bar-widget"],
   "entryPoints": {
-    "panel": "Panel.qml"
+    "panel": "Panel.qml",
+    "barWidget": "VideoToolsBar.qml"
+  },
+  "barWidget": {
+    "displayName": "Video tools",
+    "description": "Open the video crop and trim panel",
+    "category": "Media",
+    "allowMultiple": false
   }
 }
