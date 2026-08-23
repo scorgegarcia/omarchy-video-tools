@@ -20,7 +20,7 @@ Item {
   property string videoPath: ""
   property string outputPath: ""
   readonly property string systemLanguageCode: root.systemLanguage()
-  readonly property string language: persisted.languageOverride !== "" ? persisted.languageOverride : root.systemLanguageCode
+  readonly property string language: savedLanguage !== "" ? savedLanguage : root.systemLanguageCode
   property int sourceWidth: 0
   property int sourceHeight: 0
   property int trimStart: 0
@@ -41,6 +41,60 @@ Item {
     reloadableId: "jvi-video-tools"
     property string languageOverride: ""
   }
+
+  readonly property string stateDir: Quickshell.env("HOME") + "/.local/state/omarchy/video-tools"
+  readonly property string settingsPath: root.stateDir + "/settings.json"
+  property string savedLanguage: ""
+  property bool settingsLoaded: false
+  property bool pendingSettingsSave: false
+
+  function loadSettings(raw) {
+    try {
+      var parsed = JSON.parse(String(raw || ""))
+      var value = String(parsed.language || "")
+      root.savedLanguage = value
+      persisted.languageOverride = value
+      root.settingsLoaded = true
+      if (root.pendingSettingsSave) root.writeSettings()
+    } catch (e) {
+      root.savedLanguage = ""
+      root.settingsLoaded = true
+      if (root.pendingSettingsSave) root.writeSettings()
+    }
+  }
+
+  function saveLanguage() {
+    root.pendingSettingsSave = true
+    if (root.settingsLoaded) root.writeSettings()
+  }
+
+  function writeSettings() {
+    root.pendingSettingsSave = false
+    settingsFile.setText(JSON.stringify({ version: 1, language: root.savedLanguage }, null, 2) + "\n")
+  }
+
+  FileView {
+    id: settingsFile
+    path: root.settingsPath
+    watchChanges: true
+    atomicWrites: true
+    printErrors: false
+    onLoaded: root.loadSettings(text())
+    onLoadFailed: {
+      root.savedLanguage = ""
+      root.settingsLoaded = true
+      if (root.pendingSettingsSave) root.writeSettings()
+    }
+    onFileChanged: reload()
+  }
+
+  Process {
+    id: ensureStateDir
+    command: ["mkdir", "-p", root.stateDir]
+    onExited: settingsFile.reload()
+  }
+
+  Component.onCompleted: ensureStateDir.running = true
 
   function t(key) { return I18n.text(root.language, key) }
 
@@ -67,7 +121,9 @@ Item {
   }
 
   function setLanguage(value) {
-    persisted.languageOverride = String(value || "")
+    root.savedLanguage = String(value || "")
+    persisted.languageOverride = root.savedLanguage
+    root.saveLanguage()
   }
 
   function systemLanguage() {
@@ -319,8 +375,8 @@ Item {
     visible: root.opened
     title: root.t("title")
     color: root.surface
-    width: 800
-    height: 450
+    implicitWidth: 800
+    implicitHeight: 450
     minimumSize: Qt.size(800, 450)
     maximumSize: Qt.size(800, 450)
 
@@ -328,9 +384,6 @@ Item {
     // shell's open-panel state just like Escape does.
     onVisibleChanged: {
       if (visible) {
-        width = 800
-        height = 450
-        minimumSize = Qt.size(800, 450)
         floatTimer.attempts = 0
         floatTimer.restart()
       }
