@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import QtMultimedia
 import Quickshell
@@ -169,6 +170,17 @@ Item {
 
   Process { id: notify }
 
+  FileDialog {
+    id: videoDialog
+    title: root.t("chooseVideo")
+    fileMode: FileDialog.OpenFile
+    nameFilters: [
+      root.t("videoFiles") + " (*.mp4 *.mkv *.mov *.webm *.avi *.m4v *.wmv *.flv)",
+      root.t("allFiles") + " (*)"
+    ]
+    onAccepted: root.loadVideo(selectedFile.toLocalFile())
+  }
+
   MediaPlayer {
     id: player
     videoOutput: videoOutput
@@ -183,11 +195,11 @@ Item {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.namespace: "jvi-video-tools"
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     Rectangle {
       anchors.fill: parent
-      color: Qt.rgba(0, 0, 0, 0.50)
+      color: Qt.rgba(0, 0, 0, 0.08)
       MouseArea { anchors.fill: parent; onClicked: root.dismiss() }
     }
 
@@ -250,6 +262,7 @@ Item {
               border.width: 1
               border.color: root.accent
               Text { anchors.centerIn: parent; text: root.t("dropHint"); color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body }
+              TapHandler { onTapped: videoDialog.open() }
             }
           }
 

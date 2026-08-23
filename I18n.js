@@ -17,7 +17,7 @@ var translations = {
     markStart: "Mark start",
     markEnd: "Mark end",
     clearCrop: "Clear crop",
-    save: "Save video"
+    save: "Save video", chooseVideo: "Choose a video", videoFiles: "Video files", allFiles: "All files"
   },
   es: {
     drop: "Suelta un video aquí para comenzar",
@@ -35,7 +35,7 @@ var translations = {
     markStart: "Marcar inicio",
     markEnd: "Marcar final",
     clearCrop: "Limpiar recorte",
-    save: "Guardar video"
+    save: "Guardar video", chooseVideo: "Seleccionar un video", videoFiles: "Archivos de video", allFiles: "Todos los archivos"
   },
   pt: {
     drop: "Solte um vídeo aqui para começar",
@@ -53,7 +53,7 @@ var translations = {
     markStart: "Marcar início",
     markEnd: "Marcar fim",
     clearCrop: "Limpar corte",
-    save: "Salvar vídeo"
+    save: "Salvar vídeo", chooseVideo: "Escolher um vídeo", videoFiles: "Arquivos de vídeo", allFiles: "Todos os arquivos"
   },
   fr: {
     drop: "Déposez une vidéo ici pour commencer",
@@ -71,7 +71,7 @@ var translations = {
     markStart: "Marquer le début",
     markEnd: "Marquer la fin",
     clearCrop: "Effacer le recadrage",
-    save: "Enregistrer la vidéo"
+    save: "Enregistrer la vidéo", chooseVideo: "Choisir une vidéo", videoFiles: "Fichiers vidéo", allFiles: "Tous les fichiers"
   },
   de: {
     drop: "Video hier ablegen, um zu beginnen",
@@ -89,7 +89,7 @@ var translations = {
     markStart: "Start markieren",
     markEnd: "Ende markieren",
     clearCrop: "Zuschnitt löschen",
-    save: "Video speichern"
+    save: "Video speichern", chooseVideo: "Video auswählen", videoFiles: "Videodateien", allFiles: "Alle Dateien"
   },
   it: {
     drop: "Trascina qui un video per iniziare",
@@ -107,7 +107,7 @@ var translations = {
     markStart: "Segna inizio",
     markEnd: "Segna fine",
     clearCrop: "Cancella ritaglio",
-    save: "Salva video"
+    save: "Salva video", chooseVideo: "Scegli un video", videoFiles: "File video", allFiles: "Tutti i file"
   },
   ja: {
     drop: "ここに動画をドロップして開始",
@@ -125,7 +125,7 @@ var translations = {
     markStart: "開始を指定",
     markEnd: "終了を指定",
     clearCrop: "クロップを解除",
-    save: "動画を保存"
+    save: "動画を保存", chooseVideo: "動画を選択", videoFiles: "動画ファイル", allFiles: "すべてのファイル"
   },
   ko: {
     drop: "시작하려면 여기에 동영상을 놓으세요",
@@ -143,7 +143,7 @@ var translations = {
     markStart: "시작 표시",
     markEnd: "끝 표시",
     clearCrop: "자르기 지우기",
-    save: "비디오 저장"
+    save: "비디오 저장", chooseVideo: "동영상 선택", videoFiles: "동영상 파일", allFiles: "모든 파일"
   },
   zh: {
     drop: "将视频拖到这里开始",
@@ -161,7 +161,7 @@ var translations = {
     markStart: "标记开始",
     markEnd: "标记结束",
     clearCrop: "清除裁剪",
-    save: "保存视频"
+    save: "保存视频", chooseVideo: "选择视频", videoFiles: "视频文件", allFiles: "所有文件"
   },
   ru: {
     drop: "Перетащите видео сюда, чтобы начать",
@@ -179,7 +179,7 @@ var translations = {
     markStart: "Отметить начало",
     markEnd: "Отметить конец",
     clearCrop: "Сбросить обрезку",
-    save: "Сохранить видео"
+    save: "Сохранить видео", chooseVideo: "Выбрать видео", videoFiles: "Видеофайлы", allFiles: "Все файлы"
   }
 }
 

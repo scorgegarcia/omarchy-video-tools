@@ -3,7 +3,8 @@
 A small, themed Omarchy 4 / Quickshell panel for simple video editing.
 
 Drop a video into the panel, preview it, mark a trim range, draw a crop area,
-and export the result with FFmpeg. It does not add a permanent widget to the
+and export the result with FFmpeg. You can also click the drop area to choose a
+video through the native file picker. It does not add a permanent widget to the
 bar.
 
 ## Features
