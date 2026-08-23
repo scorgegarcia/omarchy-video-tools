@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.Ui
 import qs.Commons
 import "I18n.js" as I18n
@@ -10,23 +11,25 @@ Item {
   property string moduleName: "jvi.video-tools"
   property var settings: ({})
 
-  readonly property string language: root.systemLanguage()
+  property string savedLanguage: ""
+  readonly property string language: root.savedLanguage !== "" ? root.savedLanguage : "en"
   readonly property string label: I18n.text(language, "app")
   readonly property bool revealed: !root.bar || root.bar.centerSectionRevealHeld === true
+
+  FileView {
+    id: settingsFile
+    path: Quickshell.env("HOME") + "/.local/state/omarchy/video-tools/settings.json"
+    watchChanges: true
+    printErrors: false
+    onLoaded: {
+      try { root.savedLanguage = String(JSON.parse(text()).language || "") } catch (e) { root.savedLanguage = "" }
+    }
+    onFileChanged: reload()
+  }
 
   visible: revealed
   implicitWidth: visible ? button.implicitWidth : 0
   implicitHeight: visible ? button.implicitHeight : 0
-
-  function systemLanguage() {
-    var candidates = [Quickshell.env("LANGUAGE"), Quickshell.env("LANG"), Quickshell.env("LC_MESSAGES"), Qt.locale().name]
-    for (var i = 0; i < candidates.length; i++) {
-      var raw = String(candidates[i] || "").split(":")[0]
-      var value = raw.toLowerCase().split("_")[0].split("-")[0]
-      if (value !== "" && value !== "c" && value !== "posix") return value
-    }
-    return "en"
-  }
 
   WidgetButton {
     id: button

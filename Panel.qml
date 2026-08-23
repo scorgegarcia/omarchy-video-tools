@@ -19,8 +19,7 @@ Item {
   property bool closingFromHost: false
   property string videoPath: ""
   property string outputPath: ""
-  readonly property string systemLanguageCode: root.systemLanguage()
-  readonly property string language: savedLanguage !== "" ? savedLanguage : root.systemLanguageCode
+  readonly property string language: savedLanguage !== "" ? savedLanguage : "en"
   property int sourceWidth: 0
   property int sourceHeight: 0
   property int trimStart: 0
@@ -99,7 +98,6 @@ Item {
   function t(key) { return I18n.text(root.language, key) }
 
   readonly property var languageOptions: [
-    { label: root.t("system"), value: "" },
     { label: "English", value: "en" },
     { label: "Español", value: "es" },
     { label: "Português", value: "pt" },
@@ -113,7 +111,7 @@ Item {
   ]
 
   function languageIndex() {
-    var selected = persisted.languageOverride
+    var selected = root.savedLanguage
     if (selected === "") return 0
     for (var i = 0; i < root.languageOptions.length; i++)
       if (root.languageOptions[i].value === selected) return i
@@ -124,16 +122,6 @@ Item {
     root.savedLanguage = String(value || "")
     persisted.languageOverride = root.savedLanguage
     root.saveLanguage()
-  }
-
-  function systemLanguage() {
-    var candidates = [Quickshell.env("LANGUAGE"), Quickshell.env("LANG"), Quickshell.env("LC_MESSAGES"), Qt.locale().name]
-    for (var i = 0; i < candidates.length; i++) {
-      var raw = String(candidates[i] || "").split(":")[0]
-      var value = raw.toLowerCase().split("_")[0].split("-")[0]
-      if (value !== "" && value !== "c" && value !== "posix") return value
-    }
-    return "en"
   }
 
   function localPath(value) {
