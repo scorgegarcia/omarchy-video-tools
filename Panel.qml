@@ -48,9 +48,20 @@ Item {
   }
 
   function localPath(value) {
+    if (value && typeof value.toLocalFile === "function") {
+      var nativePath = value.toLocalFile()
+      if (nativePath) return nativePath
+    }
     var text = String(value || "")
     if (text.indexOf("file://") === 0) text = text.replace(/^file:\/\//, "")
     try { return decodeURIComponent(text) } catch (e) { return text }
+  }
+
+  function fileUrl(path) {
+    var parts = String(path || "").split("/")
+    var encoded = []
+    for (var i = 0; i < parts.length; i++) encoded.push(encodeURIComponent(parts[i]))
+    return "file://" + (String(path || "").indexOf("/") === 0 ? "/" : "") + encoded.join("/")
   }
 
   function fileName(path) {
@@ -97,7 +108,7 @@ Item {
     root.trimStart = 0
     root.trimEnd = 0
     root.status = root.t("preparing")
-    player.source = Qt.resolvedUrl("file://" + path)
+    player.source = root.fileUrl(path)
     player.play()
     probe.command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", path]
     probe.running = true
@@ -186,7 +197,9 @@ Item {
     ]
     onAccepted: {
       root.fileDialogOpen = false
-      root.loadVideo(selectedFile.toLocalFile())
+      var chosen = selectedFile
+      if ((!chosen || chosen.toString() === "") && selectedFiles.length > 0) chosen = selectedFiles[0]
+      root.loadVideo(root.localPath(chosen))
     }
     onRejected: root.fileDialogOpen = false
     onVisibleChanged: if (!visible) root.fileDialogOpen = false
