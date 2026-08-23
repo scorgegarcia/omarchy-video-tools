@@ -26,6 +26,7 @@ Item {
   property int trimEnd: 0
   property bool hasSelection: cropRect.width > 8 && cropRect.height > 8
   property bool exporting: false
+  property bool fileDialogOpen: false
   property string status: I18n.text(language, "drop")
   property color surface: Color.popups.background
   property color foreground: Color.popups.text
@@ -138,6 +139,11 @@ Item {
     cropRect.width = 0; cropRect.height = 0
   }
 
+  function openVideoDialog() {
+    root.fileDialogOpen = true
+    videoDialog.open()
+  }
+
   Process {
     id: probe
     stdout: StdioCollector {
@@ -178,7 +184,12 @@ Item {
       root.t("videoFiles") + " (*.mp4 *.mkv *.mov *.webm *.avi *.m4v *.wmv *.flv)",
       root.t("allFiles") + " (*)"
     ]
-    onAccepted: root.loadVideo(selectedFile.toLocalFile())
+    onAccepted: {
+      root.fileDialogOpen = false
+      root.loadVideo(selectedFile.toLocalFile())
+    }
+    onRejected: root.fileDialogOpen = false
+    onVisibleChanged: if (!visible) root.fileDialogOpen = false
   }
 
   MediaPlayer {
@@ -196,6 +207,10 @@ Item {
     WlrLayershell.namespace: "jvi-video-tools"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+    // Keep only the editor card interactive. When the native file dialog is
+    // open, remove the region entirely so the dialog can receive clicks even
+    // though this panel remains on the overlay layer.
+    mask: Region { item: root.fileDialogOpen ? null : dropFocus }
 
     Rectangle {
       anchors.fill: parent
@@ -265,7 +280,7 @@ Item {
               border.width: 1
               border.color: root.accent
               Text { anchors.centerIn: parent; text: root.t("dropHint"); color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body }
-              TapHandler { onTapped: videoDialog.open() }
+              TapHandler { onTapped: root.openVideoDialog() }
             }
           }
 
