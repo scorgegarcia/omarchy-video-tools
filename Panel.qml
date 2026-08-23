@@ -261,7 +261,7 @@ Item {
             var target = 'address:' + client.address
             floatSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.float({ window = "' + target + '", action = "on" })']
             floatTimer.stop()
-            initialResize.command = ["hyprctl", "dispatch", 'hl.dsp.window.resize({ window = "' + target + '", x = 800, y = 450 })']
+            initialResize.command = ["hyprctl", "dispatch", 'hl.dsp.window.resize({ window = "' + target + '", x = 640, y = 480 })']
             centerSetter.command = ["hyprctl", "dispatch", 'hl.dsp.window.center({ window = "' + target + '" })']
             floatSetter.running = true
           }
@@ -343,8 +343,8 @@ Item {
     visible: root.opened
     title: root.t("title")
     color: root.surface
-    implicitWidth: 800
-    implicitHeight: 450
+    implicitWidth: 640
+    implicitHeight: 480
     minimumSize: Qt.size(640, 360)
     maximumSize: Qt.size(1600, 900)
 
