@@ -40,9 +40,14 @@ Item {
 
   readonly property string stateDir: Quickshell.env("HOME") + "/.local/state/omarchy/video-tools"
   readonly property string settingsPath: root.stateDir + "/settings.json"
+  readonly property string safeIoScript: Qt.resolvedUrl("helpers/safe_io.py").toLocalFile()
+  readonly property string boundedCommandScript: Qt.resolvedUrl("helpers/bounded_command.py").toLocalFile()
+  readonly property int probeByteLimit: 128
+  readonly property int hyprlandByteLimit: 4096
   property string savedLanguage: ""
   property bool settingsLoaded: false
   property bool pendingSettingsSave: false
+  property string pendingSettingsText: ""
 
   function loadSettings(raw) {
     try {
@@ -65,29 +70,45 @@ Item {
   }
 
   function writeSettings() {
+    if (settingsWrite.running) {
+      root.pendingSettingsSave = true
+      return
+    }
     root.pendingSettingsSave = false
-    settingsFile.setText(JSON.stringify({ version: 1, language: root.savedLanguage }, null, 2) + "\n")
+    root.pendingSettingsText = JSON.stringify({ version: 1, language: root.savedLanguage }, null, 2) + "\n"
+    if (!settingsWrite.running) settingsWrite.running = true
   }
 
-  FileView {
-    id: settingsFile
-    path: root.settingsPath
-    watchChanges: true
-    atomicWrites: true
-    printErrors: false
-    onLoaded: root.loadSettings(text())
-    onLoadFailed: {
-      root.savedLanguage = ""
-      root.settingsLoaded = true
-      if (root.pendingSettingsSave) root.writeSettings()
+  Process {
+    id: settingsRead
+    command: ["python3", root.safeIoScript, "read", root.settingsPath]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: root.loadSettings(String(text || ""))
     }
-    onFileChanged: reload()
+    onExited: function(exitCode) {
+      if (exitCode !== 0 && !root.settingsLoaded) root.loadSettings("")
+    }
+  }
+
+  Process {
+    id: settingsWrite
+    command: ["python3", root.safeIoScript, "write", root.settingsPath]
+    stdinEnabled: false
+    onStarted: {
+      write(root.pendingSettingsText)
+      root.pendingSettingsText = ""
+      settingsWrite.stdinEnabled = false
+    }
+    onExited: {
+      if (root.pendingSettingsSave && !settingsWrite.running) root.writeSettings()
+    }
   }
 
   Process {
     id: ensureStateDir
     command: ["mkdir", "-p", root.stateDir]
-    onExited: settingsFile.reload()
+    onExited: settingsRead.running = true
   }
 
   Component.onCompleted: ensureStateDir.running = true
@@ -187,7 +208,7 @@ Item {
     root.status = root.t("preparing")
     player.source = root.fileUrl(path)
     player.play()
-    probe.command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", path]
+    probe.command = ["python3", root.boundedCommandScript, String(root.probeByteLimit), "ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", path]
     probe.running = true
   }
 
@@ -251,7 +272,7 @@ Item {
     id: floatQuery
     // The plugin window is active immediately after it is summoned. Query
     // only that window instead of materializing every client in Quickshell.
-    command: ["hyprctl", "-j", "activewindow"]
+    command: ["python3", root.boundedCommandScript, String(root.hyprlandByteLimit), "hyprctl", "-j", "activewindow"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {

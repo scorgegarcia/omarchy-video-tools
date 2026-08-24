@@ -14,18 +14,21 @@ Item {
   property string savedLanguage: ""
   readonly property string language: root.savedLanguage !== "" ? root.savedLanguage : "en"
   readonly property string label: I18n.text(language, "app")
+  readonly property string safeIoScript: Qt.resolvedUrl("helpers/safe_io.py").toLocalFile()
   readonly property bool revealed: !root.bar || root.bar.centerSectionRevealHeld === true
 
-  FileView {
-    id: settingsFile
-    path: Quickshell.env("HOME") + "/.local/state/omarchy/video-tools/settings.json"
-    watchChanges: true
-    printErrors: false
-    onLoaded: {
-      try { root.savedLanguage = String(JSON.parse(text()).language || "") } catch (e) { root.savedLanguage = "" }
+  Process {
+    id: settingsRead
+    command: ["python3", root.safeIoScript, "read", Quickshell.env("HOME") + "/.local/state/omarchy/video-tools/settings.json"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        try { root.savedLanguage = String(JSON.parse(text).language || "") } catch (e) { root.savedLanguage = "" }
+      }
     }
-    onFileChanged: reload()
   }
+
+  Component.onCompleted: settingsRead.running = true
 
   visible: revealed
   implicitWidth: visible ? button.implicitWidth : 0

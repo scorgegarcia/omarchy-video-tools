@@ -23,7 +23,7 @@ video through the native file picker.
 ## Requirements
 
 - Omarchy 4 with the Quickshell shell
-- `ffmpeg`, `ffprobe`, and Qt Multimedia
+- `ffmpeg`, `ffprobe`, Python 3, and Qt Multimedia
 
 ## Install
 
