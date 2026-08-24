@@ -1,5 +1,7 @@
 # Omarchy Video Tools
 
+![Preview](https://github.com/scorgegarcia/omarchy-video-tools/blob/main/preview.png?raw=true)
+
 A small, themed Omarchy 4 / Quickshell panel for simple video editing.
 
 Drop a video into the panel, preview it, mark a trim range, draw a crop area,
