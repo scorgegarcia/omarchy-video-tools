@@ -32,6 +32,34 @@ Item {
   property color accent: Color.accent
   property string fontFamily: Style.font.family
 
+  component ThemeButton: Button {
+    id: themedButton
+    implicitHeight: Style.space(30)
+    horizontalPadding: Style.space(10)
+    verticalPadding: Style.space(5)
+
+    contentItem: Text {
+      text: themedButton.text
+      color: themedButton.enabled ? root.accent : Qt.alpha(root.accent, 0.35)
+      font.family: root.fontFamily
+      font.pixelSize: Style.font.caption
+      horizontalAlignment: Text.AlignHCenter
+      verticalAlignment: Text.AlignVCenter
+      elide: Text.ElideRight
+    }
+
+    background: Rectangle {
+      implicitWidth: Style.space(82)
+      implicitHeight: Style.space(30)
+      color: themedButton.pressed
+        ? Qt.alpha(root.accent, 0.18)
+        : (themedButton.hovered ? Qt.alpha(root.accent, 0.08) : "transparent")
+      border.width: 1
+      border.color: themedButton.enabled ? root.accent : Qt.alpha(root.accent, 0.35)
+      radius: Style.cornerRadius
+    }
+  }
+
   PersistentProperties {
     id: persisted
     reloadableId: "jvi-video-tools"
@@ -556,12 +584,12 @@ Item {
         RowLayout {
           Layout.fillWidth: true
           spacing: Style.space(8)
-          Button { text: player.playbackState === MediaPlayer.PlayingState ? root.t("pause") : root.t("play"); enabled: !!root.videoPath; onClicked: player.playbackState === MediaPlayer.PlayingState ? player.pause() : player.play() }
-          Button { text: root.t("markStart"); enabled: !!root.videoPath; onClicked: root.trimStart = player.position }
-          Button { text: root.t("markEnd"); enabled: !!root.videoPath; onClicked: root.trimEnd = player.position }
-          Button { text: root.t("clearCrop"); enabled: root.hasSelection; onClicked: root.resetCrop() }
+          ThemeButton { text: player.playbackState === MediaPlayer.PlayingState ? root.t("pause") : root.t("play"); enabled: !!root.videoPath; onClicked: player.playbackState === MediaPlayer.PlayingState ? player.pause() : player.play() }
+          ThemeButton { text: root.t("markStart"); enabled: !!root.videoPath; onClicked: root.trimStart = player.position }
+          ThemeButton { text: root.t("markEnd"); enabled: !!root.videoPath; onClicked: root.trimEnd = player.position }
+          ThemeButton { text: root.t("clearCrop"); enabled: root.hasSelection; onClicked: root.resetCrop() }
           Item { Layout.fillWidth: true }
-          Button { text: root.exporting ? root.t("exporting") : root.t("save"); enabled: !!root.videoPath && !root.exporting; onClicked: root.exportVideo() }
+          ThemeButton { text: root.exporting ? root.t("exporting") : root.t("save"); enabled: !!root.videoPath && !root.exporting; onClicked: root.exportVideo() }
         }
       }
     }
