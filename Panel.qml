@@ -440,6 +440,64 @@ Item {
             implicitHeight: Style.space(28)
             font.family: root.fontFamily
             font.pixelSize: Style.font.caption
+            contentItem: Text {
+              leftPadding: Style.space(9)
+              rightPadding: languageBox.indicator.width + Style.space(8)
+              text: languageBox.displayText
+              color: root.accent
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              verticalAlignment: Text.AlignVCenter
+              elide: Text.ElideRight
+            }
+            indicator: Text {
+              x: languageBox.width - width - Style.space(8)
+              y: (languageBox.height - height) / 2
+              text: "▾"
+              color: root.accent
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+            }
+            background: Rectangle {
+              color: languageBox.pressed
+                ? Qt.alpha(root.accent, 0.18)
+                : (languageBox.hovered ? Qt.alpha(root.accent, 0.08) : "transparent")
+              border.width: 1
+              border.color: root.accent
+              radius: Style.cornerRadius
+            }
+            delegate: ItemDelegate {
+              width: languageBox.width
+              highlighted: languageBox.highlightedIndex === index
+              contentItem: Text {
+                text: modelData.label
+                color: root.accent
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideRight
+              }
+              background: Rectangle {
+                color: parent.highlighted ? Qt.alpha(root.accent, 0.14) : root.surface
+              }
+            }
+            popup: Popup {
+              y: languageBox.height + Style.space(4)
+              width: languageBox.width
+              padding: 1
+              contentItem: ListView {
+                clip: true
+                implicitHeight: contentHeight
+                model: languageBox.popup.visible ? languageBox.delegateModel : null
+                currentIndex: languageBox.highlightedIndex
+              }
+              background: Rectangle {
+                color: root.surface
+                border.width: 1
+                border.color: root.accent
+                radius: Style.cornerRadius
+              }
+            }
             onActivated: function(index) { root.setLanguage(root.languageOptions[index].value) }
             Connections {
               target: root
