@@ -14,7 +14,7 @@ video through the native file picker.
 - In-panel playback
 - Trim start and end markers
 - Crop selection by dragging over the preview
-- Export to `<original-name>-edited.mp4`
+- Export to `<original-name>-edited.mp4` with a 10-minute and 2 GiB safety limit
 - Uses Omarchy shell colors and font
 - Localized for English, Spanish, Portuguese, French, German, Italian,
   Japanese, Korean, Chinese, and Russian

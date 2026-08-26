@@ -70,8 +70,11 @@ Item {
   readonly property string settingsPath: root.stateDir + "/settings.json"
   readonly property string safeIoScript: Qt.resolvedUrl("helpers/safe_io.py").toLocalFile()
   readonly property string boundedCommandScript: Qt.resolvedUrl("helpers/bounded_command.py").toLocalFile()
+  readonly property string safeExportScript: Qt.resolvedUrl("helpers/safe_export.py").toLocalFile()
   readonly property int probeByteLimit: 128
   readonly property int hyprlandByteLimit: 4096
+  readonly property int exportTimeoutSeconds: 600
+  readonly property real exportByteLimit: 2147483648
   property string savedLanguage: ""
   property bool settingsLoaded: false
   property bool pendingSettingsSave: false
@@ -277,10 +280,10 @@ Item {
     if (!root.videoPath || root.exporting) return
     var finish = root.trimEnd > 0 ? root.trimEnd : player.duration
     if (finish <= root.trimStart) finish = player.duration
-    var args = ["ffmpeg", "-y", "-i", root.videoPath, "-ss", (root.trimStart / 1000).toFixed(3), "-to", (finish / 1000).toFixed(3)]
+    var args = ["python3", root.safeExportScript, String(root.exportTimeoutSeconds), String(root.exportByteLimit), root.outputPath, "ffmpeg", "-i", root.videoPath, "-ss", (root.trimStart / 1000).toFixed(3), "-to", (finish / 1000).toFixed(3)]
     var filter = root.cropFilter()
     if (filter !== "") args.push("-vf", filter)
-    args.push("-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-c:a", "aac", root.outputPath)
+    args.push("-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-c:a", "aac")
     root.status = root.t("exporting")
     root.exporting = true
     exportProc.command = args
